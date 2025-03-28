@@ -31,6 +31,14 @@ Runs all the unit tests
 
 Build Wallet and upload it to appcenter
 
+### android upload_to_google_play
+
+```sh
+[bundle exec] fastlane android upload_to_google_play
+```
+
+Upload to google play
+
 ### android upload_tag
 
 ```sh

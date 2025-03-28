@@ -23,7 +23,13 @@ platform :android do
 
     # Run tests
     gradle(task: "clean")
-    gradle(task: "koverHtmlReport#{ENV["APP_BUILD_TYPE"]}Debug")
+    # gradle(task: "koverHtmlReport#{ENV["APP_BUILD_TYPE"]}Debug")
+
+    gradle(
+      task: "bundle",
+      flavor: "Demo",
+      build_type: "Release"
+    )
 
     # Clean Artifacts
     clean_build_artifacts
@@ -32,15 +38,17 @@ platform :android do
   desc "Build Wallet and upload it to appcenter"
   lane :deploy do
 
-    git_pull
+    #git_pull
 
-    appcenter_build_number = latest_appcenter_release(
-      appName: ENV["APP_CENTER_APP_NAME"],
-      appToken: ENV["APP_CENTER_APP_TOKEN"],
-      ownerName: ENV["APP_CENTER_ACCOUNT"],
-    )
+#     appcenter_build_number = latest_appcenter_release(
+#       appName: ENV["APP_CENTER_APP_NAME"],
+#       appToken: ENV["APP_CENTER_APP_TOKEN"],
+#       ownerName: ENV["APP_CENTER_ACCOUNT"],
+#     )
+#
+#     buildNumber = build_number(versionNumber: appcenter_build_number)
 
-    buildNumber = build_number(versionNumber: appcenter_build_number)
+    buildNumber = build_number(versionNumber: 4)
 
     set_version(buildCode: buildNumber)
     fullVersion = full_version(buildType: ENV["APP_BUILD_TYPE"])
@@ -58,37 +66,60 @@ platform :android do
     )
 
     gradle(task: "clean")
-    gradle(task: "assemble#{ENV["APP_BUILD_TYPE"]}Release")
+    # gradle(task: "assemble#{ENV["APP_BUILD_TYPE"]}Release")
 
-    upload_to_appcenter(
-      appName: ENV["APP_CENTER_APP_NAME"],
-      path: ENV["APP_BUILD_TYPE"],
-      appToken: ENV["APP_CENTER_APP_TOKEN"],
-      ownerName: ENV["APP_CENTER_ACCOUNT"],
-      groups: ENV["APP_CENTER_GROUPS"],
+    gradle(
+      task: "bundle",
+      flavor: "Demo",
+      build_type: "Release"
     )
+
+
+#     upload_to_appcenter(
+#       appName: ENV["APP_CENTER_APP_NAME"],
+#       path: ENV["APP_BUILD_TYPE"],
+#       appToken: ENV["APP_CENTER_APP_TOKEN"],
+#       ownerName: ENV["APP_CENTER_ACCOUNT"],
+#       groups: ENV["APP_CENTER_GROUPS"],
+#     )
 
     clean_build_artifacts
     reset_versioncode
     reset_versionName
 
-    add_git_tag(
-      tag: tagVersion,
+#    add_git_tag(
+#      tag: tagVersion,
+#    )
+
+#     if ENV['PROD_REMOTE_REPO']
+#       upload_tag(
+#         remoteUrl: ENV['PROD_REMOTE_REPO'],
+#         tag: tagVersion,
+#       )
+#     end
+#
+#     if ENV['DEV_REMOTE_REPO']
+#       upload_tag(
+#         remoteUrl: ENV['DEV_REMOTE_REPO'],
+#         tag: tagVersion,
+#       )
+#     end
+  end
+
+  desc "Upload to google play"
+  lane :upload_to_google_play do |values|
+
+    supply(
+      skip_upload_apk: true,
+      skip_upload_changelogs: false,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      track: 'internal',
+      package_name:'com.sicpa.eudi.demo',
+  #           metadata_path: './fastlane/metadata/android/myflavor',
+      json_key: './google-play.json'
     )
 
-    if ENV['PROD_REMOTE_REPO']
-      upload_tag(
-        remoteUrl: ENV['PROD_REMOTE_REPO'],
-        tag: tagVersion,
-      )
-    end
-  
-    if ENV['DEV_REMOTE_REPO']
-      upload_tag(
-        remoteUrl: ENV['DEV_REMOTE_REPO'],
-        tag: tagVersion,
-      )
-    end
   end
 
   desc "Upload tag to remote repo"

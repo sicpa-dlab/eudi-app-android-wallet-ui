@@ -1,2 +1,11 @@
-json_key_file("")
-package_name("")
+#json_key_file("./release.keystore")
+package_name("com.sicpa.eudi.demo")
+
+json_key_file("./google-play.json")
+
+
+for_platform :android do
+  for_lane :beta do
+    package_name("com.sicpa.eudi.demo")
+  end
+end
